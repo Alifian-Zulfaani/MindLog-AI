@@ -8,6 +8,7 @@ export const entries = pgTable("entries", {
   userId: uuid("user_id").notNull(), 
   contentRaw: text("content_raw").notNull(),
   moodScore: integer("mood_score"), // Skala 1-10
+  moodLabel: text("mood_label"), // misal: "Cemas", "Semangat", "Lega"
   aiSummary: text("ai_summary"), // Hasil olahan AI nanti
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

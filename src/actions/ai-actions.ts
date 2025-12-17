@@ -26,6 +26,7 @@ export async function analyzeEntry(entryId: string, content: string) {
       Output MURNI JSON string saja tanpa markdown:
       {
         "mood_score": number,
+        "mood_label": "string",
         "advice": "string"
       }
     `;
