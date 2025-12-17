@@ -2,7 +2,7 @@
 const https = require("https");
 
 // 🔴 PASTE API KEY KAMU DI SINI (Pastikan ini key dari AI Studio)
-const API_KEY = "AIzaSyAHTnx0PNmkMqYx9rgA7qyXOm6XOczzSMc";
+const API_KEY = process.env.GOOGLE_API_KEY || "";
 
 const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
 
