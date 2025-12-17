@@ -1,4 +1,3 @@
-// src/actions/auth-actions.ts
 'use server'
 
 import { createClient } from "@/lib/supabase/server";
@@ -23,4 +22,10 @@ export async function login(formData: FormData) {
   
   // Redirect atau beri notifikasi cek email
   redirect("/?message=check-email");
+}
+
+export async function signOutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }
