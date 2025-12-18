@@ -6,20 +6,18 @@ import { eq, desc } from "drizzle-orm";
 import { AnalyzeButton } from "@/components/features/AnalyzeButton";
 import { CreateEntryForm } from "@/components/features/CreateEntryForm";
 import { UserNav } from "@/components/shared/UserNav";
+import { BookHeart, CalendarDays, Sparkles, TrendingUp } from "lucide-react"; // Tambah icon TrendingUp
 
-// Helper warna background kartu berdasarkan mood
 const getCardStyle = (score: number | null) => {
-  if (score === null) return "bg-white border-slate-100"; // Belum dianalisis
-  if (score <= 4) return "bg-rose-50/80 border-rose-100"; // Mood buruk
-  if (score <= 7) return "bg-sky-50/80 border-sky-100"; // Mood biasa
-  return "bg-emerald-50/80 border-emerald-100"; // Mood bagus
+  if (score === null) return "bg-white border-slate-100 hover:border-indigo-200";
+  if (score <= 4) return "bg-rose-50/60 border-rose-100 hover:border-rose-200";
+  if (score <= 7) return "bg-indigo-50/60 border-indigo-100 hover:border-indigo-200";
+  return "bg-teal-50/60 border-teal-100 hover:border-teal-200";
 };
 
 export default async function Dashboard() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
 
@@ -30,129 +28,137 @@ export default async function Dashboard() {
     .orderBy(desc(entries.createdAt));
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* HEADER STICKY */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
-        <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50/50 pb-20 selection:bg-indigo-100 selection:text-indigo-900">
+      
+      {/* 1. HEADER */}
+      <nav className="sticky top-0 z-40 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md transition-all supports-[backdrop-filter]:bg-white/60">
+        <div className="mx-auto flex h-16 max-w-lg items-center justify-between px-4">
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               MindLog
             </h1>
-            <p className="text-[10px] text-slate-500 font-medium">
-              YOUR DAILY AI COMPANION
+            <p className="text-[10px] font-medium text-slate-500 tracking-wide">
+              DAILY AI JOURNAL
             </p>
           </div>
           <UserNav email={user.email} />
         </div>
       </nav>
 
-      <main className="max-w-lg mx-auto px-4 mt-6 space-y-8">
-        {/* INPUT FORM SECTION */}
-        <section>
+      {/* 2. MAIN CONTENT */}
+      <main className="mx-auto max-w-lg px-4 mt-8 space-y-10 animate-in fade-in duration-500 slide-in-from-bottom-4">
+        
+        {/* SECTION 1: INPUT FORM */}
+        <section className="relative z-10">
+          <div className="mb-3 pl-1">
+             <h2 className="text-lg font-semibold text-gray-800">Apa Kabar Hari Ini?</h2>
+             <p className="text-xs text-gray-500">Ceritakan harimu, biarkan AI menyimaknya.</p>
+          </div>
           <CreateEntryForm />
         </section>
 
-        {/* LIST SECTION */}
+        {/* SECTION 2: HORIZONTAL LIST (CAROUSEL) */}
         <section>
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-sm font-bold text-slate-700">Riwayat Jurnal</h2>
-            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
-              {journalEntries.length} Entries
-            </span>
+          <div className="flex items-center justify-between mb-4 pl-1 pr-2">
+            <div className="flex items-center gap-2 text-slate-700">
+              <BookHeart className="h-4 w-4 text-indigo-500" />
+              <h2 className="text-sm font-bold tracking-tight">Terbaru</h2>
+            </div>
+            {/* Indikator Swipe */}
+            {journalEntries.length > 1 && (
+              <span className="text-[10px] text-slate-400 font-medium animate-pulse">
+                Geser ke samping &rarr;
+              </span>
+            )}
           </div>
 
-          <div className="space-y-4">
+          {/* Wrapper Carousel */}
+          {/* -mx-4 px-4 agar konten mentok ke pinggir layar HP tapi tetap punya padding awal */}
+          <div className="relative -mx-4 px-4">
             {journalEntries.length === 0 ? (
-              <div className="flex items-center justify-between mb-4 px-1">
-                <h2 className="text-sm font-bold text-slate-700">
-                  Riwayat Jurnal
-                </h2>
-                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
-                  {journalEntries.length} Entries
-                </span>
+              <div className="mx-4 flex flex-col items-center justify-center py-12 px-4 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-white/50">
+                <div className="h-10 w-10 bg-indigo-50 rounded-full flex items-center justify-center mb-3 text-indigo-500">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <p className="text-sm text-gray-500">Belum ada cerita hari ini.</p>
               </div>
             ) : (
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-20 scrollbar-hide">
+              // HORIZONTAL SCROLL AREA
+              <div className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
                 {journalEntries.map((entry) => (
+                  // KARTU ITEM
                   <div
                     key={entry.id}
-                    className={`p-5 rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${getCardStyle(
-                      entry.moodScore
-                    )}`}
+                    // min-w-[85%] artinya lebar kartu 85% layar HP (biar kartu sebelah keliatan dikit)
+                    // snap-center biar pas berhenti swipe posisinya di tengah
+                    className={`flex-none w-[85%] sm:w-[320px] snap-center flex flex-col justify-between p-5 rounded-3xl border transition-all shadow-sm ${getCardStyle(entry.moodScore)}`}
                   >
-                    {/* Header Kartu: Tanggal & Mood Emoji */}
-                    <div className="flex justify-between items-start mb-3 border-b border-black/5 pb-3">
-                      <span className="text-xs font-semibold text-slate-500 tracking-wide">
-                        {entry.createdAt.toLocaleDateString("id-ID", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      {entry.moodScore && (
-                        <span
-                          className="text-xl animate-in zoom-in spin-in-3"
-                          title={`Score: ${entry.moodScore}`}
-                        >
-                          {entry.moodScore >= 8
-                            ? "🤩"
-                            : entry.moodScore >= 5
-                            ? "😌"
-                            : "🌧️"}
-                        </span>
-                      )}
+                    <div>
+                      {/* Header Kartu */}
+                      <div className="flex justify-between items-start mb-3 border-b border-black/5 pb-3">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                          <CalendarDays className="h-3.5 w-3.5 opacity-70" />
+                          <span>
+                            {entry.createdAt.toLocaleDateString("id-ID", {
+                              weekday: "short",
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                        {entry.moodScore && (
+                          <span className="text-xl">{entry.moodScore >= 8 ? "🤩" : entry.moodScore >= 5 ? "😌" : "🥀"}</span>
+                        )}
+                      </div>
+
+                      {/* Konten (Dibatasi 3 baris biar rapi) */}
+                      <div className="min-h-[60px]">
+                        <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">
+                          {entry.contentRaw}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Konten User */}
-                    <p className="text-slate-800 text-[15px] leading-relaxed whitespace-pre-wrap font-normal">
-                      {entry.contentRaw}
-                    </p>
-
-                    {/* AI Section */}
-                    <div className="mt-4 pt-1">
+                    {/* Footer / AI Insight */}
+                    <div className="mt-4 pt-2 border-t border-black/5">
                       {entry.aiSummary ? (
-                        <div className="bg-white/60 p-3 rounded-xl border border-black/5 backdrop-blur-sm">
-                          <div className="flex gap-2 items-start">
-                            <div className="mt-1 text-indigo-500">
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3 3 3 0 0 1-3-3V5a3 3 0 0 1 3-3Z" />
-                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                                <line x1="12" x2="12" y1="19" y2="22" />
-                              </svg>
-                            </div>
-                            <p className="text-xs text-slate-600 italic leading-5">
-                              <span className="font-semibold text-indigo-600 not-italic block mb-1">
-                                {entry.aiSummary.match(/^\[(.*?)\]/)?.[1] ||
-                                  "Insight"}
-                              </span>
-                              {entry.aiSummary.replace(/^\[.*?\]\s*/, "")}
-                            </p>
-                          </div>
+                        <div className="flex gap-2 items-start">
+                          <Sparkles className="h-3 w-3 text-indigo-500 mt-0.5 shrink-0" />
+                          <p className="text-xs text-slate-600 italic leading-snug">
+                            "{entry.aiSummary.replace(/^\[.*?\]\s*/, "")}"
+                          </p>
                         </div>
                       ) : (
-                        <AnalyzeButton
-                          id={entry.id}
-                          content={entry.contentRaw}
-                        />
+                        <div className="w-full">
+                           <AnalyzeButton id={entry.id} content={entry.contentRaw} />
+                        </div>
                       )}
                     </div>
                   </div>
                 ))}
+                
+                {/* Spacer di ujung kanan biar kartu terakhir bisa ke tengah */}
+                <div className="w-2 shrink-0"></div>
               </div>
             )}
           </div>
         </section>
+
+        {/* SECTION 3: AREA KOSONG UNTUK FITUR MASA DEPAN */}
+        <section className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-2 text-slate-800">
+                <TrendingUp className="h-5 w-5 text-indigo-500" />
+                <h3 className="font-bold">Weekly Mood Insight</h3>
+            </div>
+            <p className="text-sm text-slate-400">
+                Fitur ini akan segera hadir untuk melacak grafik emosimu minggu ini!
+            </p>
+            {/* Nanti di sini kita taruh Grafik Chart.js */}
+            <div className="mt-4 h-24 bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-xs text-slate-300">
+                Grafik akan muncul di sini
+            </div>
+        </section>
+
       </main>
     </div>
   );
