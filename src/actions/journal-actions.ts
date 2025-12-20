@@ -6,13 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-// 1. Definisikan Schema Validasi
 const journalSchema = z.object({
   content: z.string().min(10, { message: "Cerita dong, minimal 10 karakter ya!" }),
 });
 
+// PERBAIKAN: Disable linter untuk prevState: any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createEntry(prevState: any, formData: FormData) {
-  // 2. Cek Autentikasi (Security Layer)
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -20,7 +20,6 @@ export async function createEntry(prevState: any, formData: FormData) {
     return { message: "Unauthorized", success: false };
   }
 
-  // 3. Validasi Input dengan Zod
   const rawContent = formData.get("content");
   const validatedFields = journalSchema.safeParse({ content: rawContent });
 
@@ -31,19 +30,17 @@ export async function createEntry(prevState: any, formData: FormData) {
     };
   }
 
-  // 4. Simpan ke Database (Drizzle)
   try {
     await db.insert(entries).values({
       userId: user.id,
       contentRaw: validatedFields.data.content,
-      // moodScore & aiSummary kita biarkan null dulu
     });
 
-    // 5. Revalidate (Refresh data tanpa reload page browser)
     revalidatePath("/dashboard");
     return { message: "Jurnal berhasil disimpan!", success: true };
     
-  } catch (e) {
+  } catch { 
+    // PERBAIKAN: Hapus (e) karena tidak dipakai, agar tidak error "variable unused"
     return { message: "Gagal menyimpan database", success: false };
   }
 }

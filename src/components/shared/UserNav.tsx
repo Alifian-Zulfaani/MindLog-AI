@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { LogOut, User as UserIcon } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { signOutAction } from "@/actions/auth-actions"
 
 export function UserNav({ email }: { email: string | undefined }) {

@@ -6,7 +6,7 @@ import { eq, desc } from "drizzle-orm";
 import { AnalyzeButton } from "@/components/features/AnalyzeButton";
 import { CreateEntryForm } from "@/components/features/CreateEntryForm";
 import { UserNav } from "@/components/shared/UserNav";
-import { BookHeart, CalendarDays, Sparkles, TrendingUp } from "lucide-react"; // Tambah icon TrendingUp
+import { BookHeart, CalendarDays, Sparkles, TrendingUp } from "lucide-react";
 
 const getCardStyle = (score: number | null) => {
   if (score === null) return "bg-white border-slate-100 hover:border-indigo-200";
@@ -73,7 +73,6 @@ export default async function Dashboard() {
           </div>
 
           {/* Wrapper Carousel */}
-          {/* -mx-4 px-4 agar konten mentok ke pinggir layar HP tapi tetap punya padding awal */}
           <div className="relative -mx-4 px-4">
             {journalEntries.length === 0 ? (
               <div className="mx-4 flex flex-col items-center justify-center py-12 px-4 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-white/50">
@@ -89,8 +88,6 @@ export default async function Dashboard() {
                   // KARTU ITEM
                   <div
                     key={entry.id}
-                    // min-w-[85%] artinya lebar kartu 85% layar HP (biar kartu sebelah keliatan dikit)
-                    // snap-center biar pas berhenti swipe posisinya di tengah
                     className={`flex-none w-[85%] sm:w-[320px] snap-center flex flex-col justify-between p-5 rounded-3xl border transition-all shadow-sm ${getCardStyle(entry.moodScore)}`}
                   >
                     <div>
@@ -111,7 +108,7 @@ export default async function Dashboard() {
                         )}
                       </div>
 
-                      {/* Konten (Dibatasi 3 baris biar rapi) */}
+                      {/* Konten */}
                       <div className="min-h-[60px]">
                         <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">
                           {entry.contentRaw}
@@ -125,7 +122,8 @@ export default async function Dashboard() {
                         <div className="flex gap-2 items-start">
                           <Sparkles className="h-3 w-3 text-indigo-500 mt-0.5 shrink-0" />
                           <p className="text-xs text-slate-600 italic leading-snug">
-                            "{entry.aiSummary.replace(/^\[.*?\]\s*/, "")}"
+                            {/* PERBAIKAN DI SINI: Ganti " dengan &quot; */}
+                            &quot;{entry.aiSummary.replace(/^\[.*?\]\s*/, "")}&quot;
                           </p>
                         </div>
                       ) : (
@@ -137,14 +135,14 @@ export default async function Dashboard() {
                   </div>
                 ))}
                 
-                {/* Spacer di ujung kanan biar kartu terakhir bisa ke tengah */}
+                {/* Spacer di ujung kanan */}
                 <div className="w-2 shrink-0"></div>
               </div>
             )}
           </div>
         </section>
 
-        {/* SECTION 3: AREA KOSONG UNTUK FITUR MASA DEPAN */}
+        {/* SECTION 3: AREA KOSONG */}
         <section className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 mb-2 text-slate-800">
                 <TrendingUp className="h-5 w-5 text-indigo-500" />
@@ -153,7 +151,6 @@ export default async function Dashboard() {
             <p className="text-sm text-slate-400">
                 Fitur ini akan segera hadir untuk melacak grafik emosimu minggu ini!
             </p>
-            {/* Nanti di sini kita taruh Grafik Chart.js */}
             <div className="mt-4 h-24 bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-xs text-slate-300">
                 Grafik akan muncul di sini
             </div>

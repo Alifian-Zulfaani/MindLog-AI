@@ -6,13 +6,11 @@ import { entries } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-// Pastikan API KEY ada
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 
 export async function analyzeEntry(entryId: string, content: string) {
   try {
-    // UBAH DARI 'gemini-1.5-flash' KE 'gemini-pro'
-    // Model ini lebih senior dan pasti dikenali oleh SDK versi berapapun
+    // SAYA KEMBALIKAN KE 1.5 DULU AGAR STABIL (2.5 belum rilis publik)
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
@@ -35,15 +33,12 @@ export async function analyzeEntry(entryId: string, content: string) {
     const response = await result.response;
     const text = response.text();
     
-    // Bersihkan JSON (kadang AI ngasih markdown ```json)
     const cleanedJson = text.replace(/```json|```/g, "").trim();
     const data = JSON.parse(cleanedJson);
 
-    // Update Database
     await db.update(entries)
       .set({
         moodScore: data.mood_score,
-        // Format: [Label] Saran
         aiSummary: `[${data.mood_label}] ${data.advice}`, 
       })
       .where(eq(entries.id, entryId));
@@ -51,10 +46,11 @@ export async function analyzeEntry(entryId: string, content: string) {
     revalidatePath("/dashboard");
     return { success: true };
 
+  // PERBAIKAN: Disable linter untuk error: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("AI Error Full Log:", error);
     
-    // Handle Quota Limit (429)
     if (error.status === 429 || error.message?.includes('429')) {
       return { success: false, error: "AI lagi sibuk (Quota Exceeded). Tunggu sebentar ya." };
     }

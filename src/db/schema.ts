@@ -1,5 +1,5 @@
 // src/db/schema.ts
-import { pgTable, uuid, text, integer, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, timestamp } from "drizzle-orm/pg-core";
 
 // Tabel Entries (Jurnal)
 export const entries = pgTable("entries", {
