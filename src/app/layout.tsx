@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "MindLog AI - Teman Cerita Pintar",
   description: "Jurnal harian bertenaga AI untuk kesehatan mental dan produktivitasmu.",
   icons: {
-    icon: "/favicon.ico", // Pastikan ada file favicon di folder public
+    icon: "/favicon.ico", // favicon di folder public
   },
 };
 

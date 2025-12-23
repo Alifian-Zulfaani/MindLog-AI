@@ -1,10 +1,9 @@
-// src/db/schema.ts
 import { pgTable, uuid, text, integer, timestamp } from "drizzle-orm/pg-core";
 
 // Tabel Entries (Jurnal)
 export const entries = pgTable("entries", {
   id: uuid("id").defaultRandom().primaryKey(),
-  // user_id ini nanti akan kita ambil dari Session Supabase Auth
+  // user_id ini akan kita ambil dari Session Supabase Auth
   userId: uuid("user_id").notNull(), 
   contentRaw: text("content_raw").notNull(),
   moodScore: integer("mood_score"), // Skala 1-10

@@ -13,7 +13,7 @@ const initialState = {
 };
 
 export default function LoginPage() {
-  // Hook sakti Next.js 15 untuk handle form state & loading
+  // Hook untuk handle form state & loading
   const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
@@ -97,7 +97,7 @@ export default function LoginPage() {
         {/* Footer Kecil */}
         {!state.success && (
             <div className="bg-gray-50 px-8 py-4 text-center">
-                <p className="text-xs text-gray-400">MindLog AI &copy; 2026. Aman & Privat.</p>
+                <p className="text-xs text-gray-400">MindLog AI &copy; 2026. Secure & Private.</p>
             </div>
         )}
       </div>

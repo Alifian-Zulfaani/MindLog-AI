@@ -3,8 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-// PERBAIKAN: Disable linter untuk prevState: any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Fungsi untuk menangani login user
 export async function login(prevState: any, formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;

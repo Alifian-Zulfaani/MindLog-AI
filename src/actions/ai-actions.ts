@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 
 export async function analyzeEntry(entryId: string, content: string) {
   try {
-    // SAYA KEMBALIKAN KE 1.5 DULU AGAR STABIL (2.5 belum rilis publik)
+    // Inisialisasi model generatif Gemini 2.5 Flash
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
@@ -46,8 +46,7 @@ export async function analyzeEntry(entryId: string, content: string) {
     revalidatePath("/dashboard");
     return { success: true };
 
-  // PERBAIKAN: Disable linter untuk error: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Tangani error spesifik AI
   } catch (error: any) {
     console.error("AI Error Full Log:", error);
     

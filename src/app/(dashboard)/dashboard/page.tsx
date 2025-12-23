@@ -85,13 +85,13 @@ export default async function Dashboard() {
               // HORIZONTAL SCROLL AREA
               <div className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
                 {journalEntries.map((entry) => (
-                  // KARTU ITEM
+                  // CARD ITEM
                   <div
                     key={entry.id}
                     className={`flex-none w-[85%] sm:w-[320px] snap-center flex flex-col justify-between p-5 rounded-3xl border transition-all shadow-sm ${getCardStyle(entry.moodScore)}`}
                   >
                     <div>
-                      {/* Header Kartu */}
+                      {/* Header Card */}
                       <div className="flex justify-between items-start mb-3 border-b border-black/5 pb-3">
                         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                           <CalendarDays className="h-3.5 w-3.5 opacity-70" />
@@ -122,7 +122,7 @@ export default async function Dashboard() {
                         <div className="flex gap-2 items-start">
                           <Sparkles className="h-3 w-3 text-indigo-500 mt-0.5 shrink-0" />
                           <p className="text-xs text-slate-600 italic leading-snug">
-                            {/* PERBAIKAN DI SINI: Ganti " dengan &quot; */}
+                            {/* pakai &quot; untuk mengabaikan tanda petik */}
                             &quot;{entry.aiSummary.replace(/^\[.*?\]\s*/, "")}&quot;
                           </p>
                         </div>

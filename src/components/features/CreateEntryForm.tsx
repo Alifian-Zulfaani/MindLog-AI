@@ -59,7 +59,7 @@ export function CreateEntryForm() {
         />
       </div>
       
-      {/* Tombol & Error Message (Code sebelumnya...) */}
+      {/* Tombol & Error Message */}
       <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-50">
          <div className="text-xs text-slate-400">
            {state.message && !state.success && (
