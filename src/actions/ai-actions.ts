@@ -47,10 +47,13 @@ export async function analyzeEntry(entryId: string, content: string) {
     return { success: true };
 
   // Tangani error spesifik AI
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Gunakan unknown untuk menangani error yang tidak terduga
     console.error("AI Error Full Log:", error);
     
-    if (error.status === 429 || error.message?.includes('429')) {
+    const err = error as { status?: number; message?: string };
+
+    if (err.status === 429 || err.message?.includes('429')) {
       return { success: false, error: "AI lagi sibuk (Quota Exceeded). Tunggu sebentar ya." };
     }
 

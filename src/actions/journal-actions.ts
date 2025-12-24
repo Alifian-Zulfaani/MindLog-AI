@@ -10,8 +10,13 @@ const journalSchema = z.object({
   content: z.string().min(10, { message: "Cerita dong, minimal 10 karakter ya!" }),
 });
 
+export type JournalState = {
+  message?: string;
+  success: boolean;
+};
+
 // Fungsi untuk membuat entri jurnal baru
-export async function createEntry(prevState: any, formData: FormData) {
+export async function createEntry(prevState: JournalState, formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

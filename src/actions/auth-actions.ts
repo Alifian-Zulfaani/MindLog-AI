@@ -3,8 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+export type AuthState = {
+  success?: boolean;
+  message?: string;
+  error?: string;
+} | null;
+
 // Fungsi untuk menangani login user
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: AuthState, formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
 
