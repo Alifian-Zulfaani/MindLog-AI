@@ -7,6 +7,9 @@ import { AnalyzeButton } from "@/components/features/AnalyzeButton";
 import { CreateEntryForm } from "@/components/features/CreateEntryForm";
 import { UserNav } from "@/components/shared/UserNav";
 import { BookHeart, CalendarDays, Sparkles, TrendingUp } from "lucide-react";
+import { MoodChart } from "@/components/features/MoodChart"; // Import baru
+import { subDays, format } from "date-fns";
+import { id } from "date-fns/locale"; // Import locale Indonesia
 
 const getCardStyle = (score: number | null) => {
   if (score === null) return "bg-white border-slate-100 hover:border-indigo-200";
@@ -27,14 +30,51 @@ export default async function Dashboard() {
     .where(eq(entries.userId, user.id))
     .orderBy(desc(entries.createdAt));
 
+  // Siapkan array 7 hari terakhir (kosong)
+  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = subDays(new Date(), 6 - i); // Dari 6 hari lalu sampai hari ini
+    return {
+      dateObj: d,
+      dateLabel: format(d, "EEE", { locale: id }), // "Sen", "Sel", dst
+      fullDate: format(d, "dd MMMM yyyy", { locale: id }),
+      totalScore: 0,
+      count: 0,
+    };
+  });
+
+  // Isi bucket dengan data dari DB
+  journalEntries.forEach((entry) => {
+    // Hanya ambil jurnal yang ada moodScore
+    if (entry.moodScore) {
+      const entryDateStr = entry.createdAt.toDateString();
+      
+      // Cari bucket hari yang cocok
+      const dayBucket = last7Days.find(
+        (d) => d.dateObj.toDateString() === entryDateStr
+      );
+
+      if (dayBucket) {
+        dayBucket.totalScore += entry.moodScore;
+        dayBucket.count += 1;
+      }
+    }
+  });
+
+  // Hitung rata-rata & format final untuk Recharts
+  const chartData = last7Days.map((day) => ({
+    date: day.dateLabel,
+    score: day.count > 0 ? Math.round((day.totalScore / day.count) * 10) / 10 : 0, // Rata-rata 1 desimal
+    fullDate: day.fullDate,
+  }));
+
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20 selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 1. HEADER */}
-      <nav className="sticky top-0 z-40 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md transition-all supports-[backdrop-filter]:bg-white/60">
+      <nav className="sticky top-0 z-40 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md transition-all supports-backdrop-filter:bg-white/60">
         <div className="mx-auto flex h-16 max-w-lg items-center justify-between px-4">
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-extrabold tracking-tight bg-linear-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               MindLog
             </h1>
             <p className="text-[10px] font-medium text-slate-500 tracking-wide">
@@ -109,7 +149,7 @@ export default async function Dashboard() {
                       </div>
 
                       {/* Konten */}
-                      <div className="min-h-[60px]">
+                      <div className="min-h-15">
                         <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">
                           {entry.contentRaw}
                         </p>
@@ -142,17 +182,30 @@ export default async function Dashboard() {
           </div>
         </section>
 
-        {/* SECTION 3: AREA KOSONG */}
+        {/* SECTION 3: WEEKLY MOOD CHART */}
         <section className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-2 mb-2 text-slate-800">
-                <TrendingUp className="h-5 w-5 text-indigo-500" />
-                <h3 className="font-bold">Weekly Mood Insight</h3>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-slate-800">
+                    <TrendingUp className="h-5 w-5 text-indigo-500" />
+                    <div>
+                      <h3 className="font-bold text-sm">Grafik Mood Mingguan</h3>
+                      <p className="text-[10px] text-slate-400">7 hari terakhir</p>
+                    </div>
+                </div>
+                {/* Indikator Rata-rata */}
+                 {chartData.some(d => d.score > 0) && (
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400">Rata-rata</span>
+                    <p className="font-bold text-indigo-600 text-lg">
+                      {(chartData.reduce((acc, curr) => acc + curr.score, 0) / (chartData.filter(d => d.score > 0).length || 1)).toFixed(1)}
+                    </p>
+                  </div>
+                )}
             </div>
-            <p className="text-sm text-slate-400">
-                Fitur ini akan segera hadir untuk melacak grafik emosimu minggu ini!
-            </p>
-            <div className="mt-4 h-24 bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-xs text-slate-300">
-                Grafik akan muncul di sini
+
+            {/* KOMPONEN CHART */}
+            <div className="w-full">
+              <MoodChart data={chartData} />
             </div>
         </section>
 

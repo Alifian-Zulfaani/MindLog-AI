@@ -16,7 +16,7 @@ export function UserNav({ email }: { email: string | undefined }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold shadow-md hover:opacity-90 transition-opacity">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 text-white font-bold shadow-md hover:opacity-90 transition-opacity">
           {email?.charAt(0).toUpperCase()}
         </Button>
       </DropdownMenuTrigger>

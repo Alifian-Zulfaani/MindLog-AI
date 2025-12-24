@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { login } from "@/actions/auth-actions";
-import { Loader2, MailCheck, ArrowLeft } from "lucide-react"; // Pastikan install lucide-react
+import { Loader2, MailCheck, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 const initialState = {

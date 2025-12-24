@@ -52,7 +52,7 @@ export function CreateEntryForm() {
         <Textarea 
           name="content" 
           placeholder="Apa yang ada di pikiranmu saat ini?" 
-          className="min-h-[100px] border-none shadow-none resize-none p-0 text-base focus-visible:ring-0 placeholder:text-slate-400 bg-transparent"
+          className="min-h-25 border-none shadow-none resize-none p-0 text-base focus-visible:ring-0 placeholder:text-slate-400 bg-transparent"
           required
           // Disable kalau sedang sukses agar user tidak spam
           disabled={showSuccess} 
