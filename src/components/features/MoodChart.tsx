@@ -10,14 +10,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { ChartDataPoint } from "@/types";
 
-type ChartData = {
-  date: string;
-  score: number;
-  fullDate: string;
-};
-
-export function MoodChart({ data }: { data: ChartData[] }) {
+export function MoodChart({ data }: { data: ChartDataPoint[] }) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {

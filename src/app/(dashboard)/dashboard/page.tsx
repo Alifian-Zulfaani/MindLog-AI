@@ -3,87 +3,35 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { entries } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { AnalyzeButton } from "@/components/features/AnalyzeButton";
-import { CreateEntryForm } from "@/components/features/CreateEntryForm";
-import { UserNav } from "@/components/shared/UserNav";
-import { BookHeart, CalendarDays, Sparkles, TrendingUp } from "lucide-react";
-import { MoodChart } from "@/components/features/MoodChart"; // Import baru
-import { subDays, format } from "date-fns";
-import { id } from "date-fns/locale"; // Import locale Indonesia
+import { BookHeart, Sparkles, TrendingUp } from "lucide-react";
 
-const getCardStyle = (score: number | null) => {
-  if (score === null) return "bg-white border-slate-100 hover:border-indigo-200";
-  if (score <= 4) return "bg-rose-50/60 border-rose-100 hover:border-rose-200";
-  if (score <= 7) return "bg-indigo-50/60 border-indigo-100 hover:border-indigo-200";
-  return "bg-teal-50/60 border-teal-100 hover:border-teal-200";
-};
+import { DashboardHeader } from "@/components/shared/DashboardHeader";
+import { CreateEntryForm } from "@/components/features/CreateEntryForm";
+import { JournalCard } from "@/components/features/JournalCard";
+import { MoodChart } from "@/components/features/MoodChart";
+import { prepareChartData } from "@/lib/helpers/mood";
 
 export default async function Dashboard() {
+  // Auth check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect("/login");
 
+  // Fetch journal entries
   const journalEntries = await db
     .select()
     .from(entries)
     .where(eq(entries.userId, user.id))
     .orderBy(desc(entries.createdAt));
 
-  // Siapkan array 7 hari terakhir (kosong)
-  const last7Days = Array.from({ length: 7 }).map((_, i) => {
-    const d = subDays(new Date(), 6 - i); // Dari 6 hari lalu sampai hari ini
-    return {
-      dateObj: d,
-      dateLabel: format(d, "EEE", { locale: id }), // "Sen", "Sel", dst
-      fullDate: format(d, "dd MMMM yyyy", { locale: id }),
-      totalScore: 0,
-      count: 0,
-    };
-  });
-
-  // Isi bucket dengan data dari DB
-  journalEntries.forEach((entry) => {
-    // Hanya ambil jurnal yang ada moodScore
-    if (entry.moodScore) {
-      const entryDateStr = entry.createdAt.toDateString();
-      
-      // Cari bucket hari yang cocok
-      const dayBucket = last7Days.find(
-        (d) => d.dateObj.toDateString() === entryDateStr
-      );
-
-      if (dayBucket) {
-        dayBucket.totalScore += entry.moodScore;
-        dayBucket.count += 1;
-      }
-    }
-  });
-
-  // Hitung rata-rata & format final untuk Recharts
-  const chartData = last7Days.map((day) => ({
-    date: day.dateLabel,
-    score: day.count > 0 ? Math.round((day.totalScore / day.count) * 10) / 10 : 0, // Rata-rata 1 desimal
-    fullDate: day.fullDate,
-  }));
+  // Prepare chart data
+  const chartData = prepareChartData(journalEntries);
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20 selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 1. HEADER */}
-      <nav className="sticky top-0 z-40 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md transition-all supports-backdrop-filter:bg-white/60">
-        <div className="mx-auto flex h-16 max-w-lg items-center justify-between px-4">
-          <div>
-            <h1 className="text-xl font-extrabold tracking-tight bg-linear-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              MindLog
-            </h1>
-            <p className="text-[10px] font-medium text-slate-500 tracking-wide">
-              DAILY AI JOURNAL
-            </p>
-          </div>
-          <UserNav email={user.email} />
-        </div>
-      </nav>
+      <DashboardHeader email={user.email} />
 
       {/* 2. MAIN CONTENT */}
       <main className="mx-auto max-w-lg px-4 mt-8 space-y-10 animate-in fade-in duration-500 slide-in-from-bottom-4">
@@ -97,14 +45,13 @@ export default async function Dashboard() {
           <CreateEntryForm />
         </section>
 
-        {/* SECTION 2: HORIZONTAL LIST (CAROUSEL) */}
+        {/* SECTION 2: JOURNAL CARDS CAROUSEL */}
         <section>
           <div className="flex items-center justify-between mb-4 pl-1 pr-2">
             <div className="flex items-center gap-2 text-slate-700">
               <BookHeart className="h-4 w-4 text-indigo-500" />
               <h2 className="text-sm font-bold tracking-tight">Terbaru</h2>
             </div>
-            {/* Indikator Swipe */}
             {journalEntries.length > 1 && (
               <span className="text-[10px] text-slate-400 font-medium animate-pulse">
                 Geser ke samping &rarr;
@@ -122,59 +69,10 @@ export default async function Dashboard() {
                 <p className="text-sm text-gray-500">Belum ada cerita hari ini.</p>
               </div>
             ) : (
-              // HORIZONTAL SCROLL AREA
               <div className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
                 {journalEntries.map((entry) => (
-                  // CARD ITEM
-                  <div
-                    key={entry.id}
-                    className={`flex-none w-[85%] sm:w-[320px] snap-center flex flex-col justify-between p-5 rounded-3xl border transition-all shadow-sm ${getCardStyle(entry.moodScore)}`}
-                  >
-                    <div>
-                      {/* Header Card */}
-                      <div className="flex justify-between items-start mb-3 border-b border-black/5 pb-3">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                          <CalendarDays className="h-3.5 w-3.5 opacity-70" />
-                          <span>
-                            {entry.createdAt.toLocaleDateString("id-ID", {
-                              weekday: "short",
-                              day: "numeric",
-                              month: "short",
-                            })}
-                          </span>
-                        </div>
-                        {entry.moodScore && (
-                          <span className="text-xl">{entry.moodScore >= 8 ? "🤩" : entry.moodScore >= 5 ? "😌" : "🥀"}</span>
-                        )}
-                      </div>
-
-                      {/* Konten */}
-                      <div className="min-h-15">
-                        <p className="text-slate-700 text-sm leading-relaxed line-clamp-3">
-                          {entry.contentRaw}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Footer / AI Insight */}
-                    <div className="mt-4 pt-2 border-t border-black/5">
-                      {entry.aiSummary ? (
-                        <div className="flex gap-2 items-start">
-                          <Sparkles className="h-3 w-3 text-indigo-500 mt-0.5 shrink-0" />
-                          <p className="text-xs text-slate-600 italic leading-snug">
-                            {/* pakai &quot; untuk mengabaikan tanda petik */}
-                            &quot;{entry.aiSummary.replace(/^\[.*?\]\s*/, "")}&quot;
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="w-full">
-                           <AnalyzeButton id={entry.id} content={entry.contentRaw} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <JournalCard key={entry.id} entry={entry} />
                 ))}
-                
                 {/* Spacer di ujung kanan */}
                 <div className="w-2 shrink-0"></div>
               </div>

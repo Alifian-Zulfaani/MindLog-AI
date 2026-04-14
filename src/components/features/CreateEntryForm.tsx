@@ -13,26 +13,28 @@ const initialState = {
 
 export function CreateEntryForm() {
   const [state, formAction, isPending] = useActionState(createEntry, initialState);
-  // Ref untuk akses elemen form HTML
   const formRef = useRef<HTMLFormElement>(null);
-  // State lokal untuk kontrol visibilitas pesan sukses
   const [showSuccess, setShowSuccess] = useState(false);
+  // Track submission count untuk mencegah double-trigger useEffect
+  const lastSuccessRef = useRef(0);
 
   useEffect(() => {
     if (state.success) {
-      // 1. Tampilkan pesan sukses
+      // Hanya trigger jika ini submission baru (bukan re-render)
+      const now = Date.now();
+      if (now - lastSuccessRef.current < 500) return;
+      lastSuccessRef.current = now;
+
       setShowSuccess(true);
-      // 2. Reset Textarea
       formRef.current?.reset();
       
-      // 3. Sembunyikan pesan setelah 3 detik
       const timer = setTimeout(() => {
         setShowSuccess(false);
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [state.success]);
+  }, [state]);
 
   return (
     <form 
@@ -54,7 +56,6 @@ export function CreateEntryForm() {
           placeholder="Apa yang ada di pikiranmu saat ini?" 
           className="min-h-25 border-none shadow-none resize-none p-0 text-base focus-visible:ring-0 placeholder:text-slate-400 bg-transparent"
           required
-          // Disable kalau sedang sukses agar user tidak spam
           disabled={showSuccess} 
         />
       </div>
@@ -69,14 +70,14 @@ export function CreateEntryForm() {
 
         <Button 
           type="submit" 
-          disabled={isPending || showSuccess} // Disable saat loading atau sukses
+          disabled={isPending || showSuccess}
           size="sm"
           className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 transition-all"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <>Simpan <Send className="ml-2 h-3 w-3" /></>
+            <>Simpan <Send className="h-3 w-3" /></>
           )}
         </Button>
       </div>
