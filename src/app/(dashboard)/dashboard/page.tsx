@@ -4,8 +4,6 @@ import { db } from "@/db";
 import { entries } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { BookHeart, Sparkles, TrendingUp } from "lucide-react";
-
-import { DashboardHeader } from "@/components/shared/DashboardHeader";
 import { CreateEntryForm } from "@/components/features/CreateEntryForm";
 import { JournalCard } from "@/components/features/JournalCard";
 import { MoodChart } from "@/components/features/MoodChart";
@@ -28,13 +26,10 @@ export default async function Dashboard() {
   const chartData = prepareChartData(journalEntries);
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-24 selection:bg-indigo-100 selection:text-indigo-900">
-      
-      {/* 1. HEADER */}
-      <DashboardHeader email={user.email} />
+    <div className="selection:bg-indigo-100 selection:text-indigo-900 flex-1 flex flex-col">
 
       {/* 2. MAIN CONTENT */}
-      <main className="mx-auto max-w-lg px-4 mt-8 space-y-10 animate-in fade-in duration-500 slide-in-from-bottom-4">
+      <main className="px-4 pt-6 pb-6 space-y-10 animate-in fade-in duration-500 slide-in-from-bottom-4 flex-1">
         
         {/* SECTION 1: INPUT FORM */}
         <section className="relative z-10">

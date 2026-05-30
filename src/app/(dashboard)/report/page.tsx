@@ -2,8 +2,8 @@ import { BarChart3 } from "lucide-react";
 
 export default function ReportPage() {
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-24 flex flex-col items-center justify-center selection:bg-indigo-100 selection:text-indigo-900">
-      <div className="mx-auto max-w-lg px-4 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
+    <div className="flex-1 flex flex-col items-center justify-center selection:bg-indigo-100 selection:text-indigo-900 p-4">
+      <div className="flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
         <div className="h-20 w-20 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600 shadow-sm">
           <BarChart3 className="h-10 w-10" />
         </div>

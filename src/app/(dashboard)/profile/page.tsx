@@ -9,19 +9,17 @@ export default async function ProfilePage() {
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-24 selection:bg-indigo-100 selection:text-indigo-900">
-      {/* Header Profile */}
-      <div className="bg-white border-b border-gray-200/60 pt-12 pb-6 px-4">
-        <div className="max-w-lg mx-auto flex flex-col items-center text-center">
-          <div className="h-20 w-20 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 text-white font-bold text-3xl shadow-lg flex items-center justify-center mb-4">
+    <div className="selection:bg-indigo-100 selection:text-indigo-900 flex-1 flex flex-col">
+      <main className="px-4 pt-6 pb-6 space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4 flex-1">
+        
+        {/* Profile Info Section */}
+        <section className="flex flex-col items-center text-center relative z-10">
+          <div className="h-24 w-24 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 text-white font-bold text-4xl shadow-xl flex items-center justify-center mb-4 ring-4 ring-white">
             {user.email?.charAt(0).toUpperCase()}
           </div>
-          <h1 className="text-xl font-bold text-slate-800">Profil Kamu</h1>
-          <p className="text-sm text-slate-500">{user.email}</p>
-        </div>
-      </div>
-
-      <main className="mx-auto max-w-lg px-4 mt-6 space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Profil Kamu</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">{user.email}</p>
+        </section>
         
         {/* Settings List */}
         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -73,7 +71,7 @@ export default async function ProfilePage() {
           <form action={signOutAction}>
             <button 
               type="submit"
-              className="w-full py-4 bg-white border border-red-100 rounded-3xl shadow-sm flex items-center justify-center gap-2 text-red-600 font-semibold hover:bg-red-50 transition-colors"
+              className="w-full py-4 bg-white border border-red-100 rounded-3xl shadow-sm flex items-center justify-center gap-2 text-red-600 font-bold hover:bg-red-50 hover:border-red-200 transition-all active:scale-[0.98]"
             >
               <LogOut className="h-5 w-5" />
               Keluar Akun
