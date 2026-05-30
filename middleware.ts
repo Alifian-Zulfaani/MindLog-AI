@@ -3,9 +3,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 /**
  * Middleware Supabase Auth — refresh session di setiap request.
- * Menggunakan API modern `getAll/setAll` dari @supabase/ssr.
+ * Dioptimasi: skip auth check untuk route publik, dan redirect ke login
+ * jika user belum login di route terproteksi.
  */
+
+// Route yang tidak perlu auth check
+const PUBLIC_ROUTES = ['/login', '/auth/callback', '/auth/auth-code-error']
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Skip auth check untuk route publik
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route))
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -19,7 +29,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
           supabaseResponse = NextResponse.next({
@@ -33,8 +43,22 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session sebelum masuk ke Server Components
-  await supabase.auth.getUser()
+  // Refresh session & cek auth
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Jika route terproteksi dan user belum login → redirect ke login
+  if (!isPublicRoute && !user) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Jika user sudah login tapi akses halaman login → redirect ke dashboard
+  if (isPublicRoute && user && pathname === '/login') {
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    return NextResponse.redirect(dashboardUrl)
+  }
 
   return supabaseResponse
 }
@@ -42,10 +66,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - Static assets (svg, png, jpg, etc.)
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
