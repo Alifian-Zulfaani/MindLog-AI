@@ -28,7 +28,7 @@ export default async function Dashboard() {
   const chartData = prepareChartData(journalEntries);
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20 selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-gray-50/50 pb-24 selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 1. HEADER */}
       <DashboardHeader email={user.email} />
